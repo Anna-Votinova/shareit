@@ -78,14 +78,15 @@ public class ItemInMemoryDao implements ItemDaoStorage {
     }
 
     private void itemBuild(Item itemForUpdate, Item itemFromRequest) {
+        if (itemFromRequest.getAvailable() != null) {
+            itemForUpdate.setAvailable(itemFromRequest.getAvailable());
+        }
         if (itemFromRequest.getName() != null) {
             itemForUpdate.setName(itemFromRequest.getName());
         }
         if (itemFromRequest.getDescription() != null) {
             itemForUpdate.setDescription(itemFromRequest.getDescription());
         }
-        if (itemFromRequest.getAvailable() != null) {
-            itemForUpdate.setAvailable(itemFromRequest.getAvailable());
-        }
+
     }
 }

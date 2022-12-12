@@ -1,8 +1,9 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.dao.UserDaoStorage;
+import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -14,36 +15,38 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserDaoStorage storage;
+    private final UserRepository userRepository;
     private final UserMapper mapper;
 
     @Override
     public UserDto create(UserDto userDto) {
-        checkUserEmail(userDto.getEmail());
-        User user = mapper.fromUserDtoCreate(userDto);
-        User createdUser = storage.addToUserMap(user);
-        return mapper.fromUser(createdUser);
+        User user = mapper.fromDto(userDto);
+        try {
+            return mapper.fromUser(userRepository.save(user));
+        } catch (DataIntegrityViolationException ex) {
+            throw new RuntimeException("Юзер email " + userDto.getEmail() + " уже существует");
+        }
     }
 
     @Override
     public Optional<UserDto> update(Long id, UserDto userDto) {
-            checkUserEmail(userDto.getEmail());
-            User user = mapper.fromUserDtoUpdate(userDto);
-            User updatedUser = storage.update(id, user).orElseThrow(
-                    () -> new IllegalArgumentException("Юзер с id" + id + "не найден"));
-            return Optional.of(mapper.fromUser(updatedUser));
+            User userForUpdate = (userRepository.findById(id)).orElseThrow(
+                    () -> new IllegalArgumentException("Юзер с id " + id + " не найден"));
+            Optional.ofNullable(userDto.getName()).ifPresent(userForUpdate::setName);
+            Optional.ofNullable(userDto.getEmail()).ifPresent(userForUpdate::setEmail);
+            return Optional.of(mapper.fromUser(userRepository.save(userForUpdate)));
     }
 
     @Override
     public Optional<UserDto> getUserById(Long id) {
-        User user = storage.getUserById(id).orElseThrow(
-                () -> new IllegalArgumentException("Юзер с id" + id + "не найден"));
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Юзер с id " + id + " не найден"));
         return Optional.of(mapper.fromUser(user));
     }
 
     @Override
     public List<UserDto> getAll() {
-        List<User> responseUserList = storage.getAll();
+        List<User> responseUserList = userRepository.findAll();
         if (responseUserList.isEmpty()) {
             throw new IllegalArgumentException("Ни один юзер не найден");
         }
@@ -54,15 +57,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUserById(Long id) {
-        storage.deleteUserById(id);
+        userRepository.deleteById(id);
     }
 
-    private void checkUserEmail(String email) {
-        List<String> emails = storage.getAll().stream()
-                .map(User::getEmail)
-                .collect(Collectors.toList());
-        if (!emails.isEmpty() && emails.contains(email)) {
-            throw new RuntimeException("Юзер email" + email + " уже существует");
-        }
-    }
 }

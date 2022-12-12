@@ -1,15 +1,17 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
+import java.util.Set;
 
 @ToString
 @Getter
-@AllArgsConstructor
-public class ItemDto {
+@Setter
+@Builder
+public class ItemDto implements Serializable {
+
 
     private Long id;
     @NotBlank
@@ -17,4 +19,8 @@ public class ItemDto {
     @NotBlank
     private String description;
     private Boolean available;
+    private ItemDtoLastNextBooking lastBooking;
+    private ItemDtoLastNextBooking nextBooking;
+    private Set<CommentDto> comments;
+
 }

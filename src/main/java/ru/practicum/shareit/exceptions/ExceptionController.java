@@ -32,6 +32,12 @@ public class ExceptionController {
         return new ErrorResponse("Непредвиденная ошибка.", e.getMessage());
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleThrowable(final UnknownStateException e) {
+        return new ErrorResponse("Unknown state: " + e.getMessage(), "Неизвестное состояние запоса");
+    }
+
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final ValidationException e) {
