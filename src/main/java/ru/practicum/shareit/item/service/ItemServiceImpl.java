@@ -61,17 +61,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Optional<ItemDto> getItemByIdForUser(Long userId, Long itemId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) {
-            throw new IllegalArgumentException("Юзер с id " + userId + " не найден.");
-        }
-        Item item = itemRepository.findByIdAndOwnerId(itemId, userId).orElseThrow(
-                () -> new IllegalArgumentException("Item с id " + itemId + " не найден"));
-        return Optional.of(mapper.fromItem(item));
-    }
-
-    @Override
     public Optional<ItemDto> getItemByIdForAllUser(Long userId, Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new IllegalArgumentException("Item с id " + itemId + " не найден"));
@@ -173,5 +162,7 @@ public class ItemServiceImpl implements ItemService {
         comment = commentRepository.save(comment);
         return CommentMapper.toDto(comment);
     }
+
+
 
 }
