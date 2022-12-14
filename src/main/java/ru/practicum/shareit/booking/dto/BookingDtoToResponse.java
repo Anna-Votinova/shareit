@@ -7,10 +7,6 @@ import ru.practicum.shareit.booking.BookingStatus;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-bookings.
- */
-
 @ToString
 @Getter
 @Setter

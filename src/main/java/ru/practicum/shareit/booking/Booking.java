@@ -7,9 +7,6 @@ import ru.practicum.shareit.user.model.User;
 import javax.persistence.*;
 import java.sql.Timestamp;
 
-/**
- * TODO Sprint add-bookings.
- */
 @Entity
 @Table(name = "bookings", schema = "public")
 @AllArgsConstructor
