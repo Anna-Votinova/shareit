@@ -1,12 +1,50 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingDtoFromRequest;
+import ru.practicum.shareit.booking.dto.BookingDtoToResponse;
 
-/**
- * TODO Sprint add-bookings.
- */
+import javax.validation.Valid;
+import java.util.List;
+
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
+
+    private final BookingService bookingService;
+
+    @PostMapping
+    public BookingDtoToResponse createBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                              @Valid @RequestBody BookingDtoFromRequest dto) {
+        return bookingService.createBooking(userId, dto);
+    }
+
+    @PatchMapping("{bookingId}")
+    public BookingDtoToResponse setApproveToBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                     @PathVariable Long bookingId,
+                                                    @RequestParam(value = "approved") final Boolean approved) {
+        return bookingService.setApproveToBooking(userId, bookingId, approved);
+    }
+
+    @GetMapping("{bookingId}")
+    public BookingDtoToResponse getBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                           @PathVariable Long bookingId) {
+        return bookingService.getBooking(userId, bookingId);
+    }
+
+    @GetMapping
+    public List<BookingDtoToResponse> getBookingsAllOrByState(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestParam(value = "state", defaultValue = "ALL", required = false) final BookingState state) {
+        return bookingService.getBookingsOfUserAllOrByState(userId, state);
+    }
+
+    @GetMapping("/owner")
+    public List<BookingDtoToResponse> getBookingsAllOrByStateForOwner(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestParam(value = "state", defaultValue = "ALL", required = false) final BookingState state) {
+        return bookingService.getBookingsAllOrByStateForEveryUserItem(userId, state);
+    }
 }

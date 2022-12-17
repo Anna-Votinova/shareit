@@ -8,18 +8,8 @@ import ru.practicum.shareit.user.model.User;
 @Component
 @Getter
 public class UserMapper {
-    private Long id = 0L;
 
-    private Long generateId() {
-        ++id;
-        return getId();
-    }
-
-    public User fromUserDtoCreate(UserDto userDto) {
-        return new User(generateId(), userDto.getName(), userDto.getEmail());
-    }
-
-    public User fromUserDtoUpdate(UserDto userDto) {
+    public User fromDto(UserDto userDto) {
         return new User(userDto.getId(), userDto.getName(), userDto.getEmail());
     }
 
