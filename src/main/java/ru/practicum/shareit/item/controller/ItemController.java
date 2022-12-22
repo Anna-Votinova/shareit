@@ -18,8 +18,10 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.findAll(userId);
+    public List<ItemDto> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                           @RequestParam(defaultValue = "0") final int from,
+                                           @RequestParam(defaultValue = "10") final int size) {
+        return itemService.findAllPageable(userId, from, size);
     }
 
     @GetMapping("{itemId}")
@@ -29,19 +31,21 @@ public class ItemController {
     }
 
     @GetMapping("search")
-    public List<ItemDto> getItemByText(@RequestParam String text) {
-        return itemService.findItemByText(text);
+    public List<ItemDto> getItemByText(@RequestParam String text,
+                                       @RequestParam(defaultValue = "0") final int from,
+                                       @RequestParam(defaultValue = "10") final int size) {
+        return itemService.findItemByText(text, from, size);
     }
 
     @PostMapping
     public ItemDto addItemToUser(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                @Valid @RequestBody ItemDto itemDto) {
+                                 @Valid @RequestBody ItemDto itemDto) {
         return itemService.create(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     public Optional<ItemDto> updateItem(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                     @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
+                                        @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
         return itemService.update(userId, itemId, itemDto);
     }
 

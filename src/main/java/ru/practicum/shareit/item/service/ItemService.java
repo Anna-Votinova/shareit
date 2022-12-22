@@ -14,11 +14,12 @@ public interface ItemService {
 
     Optional<ItemDto> getItemByIdForAllUser(Long userId, Long itemId);
 
-    List<ItemDto> findAll(Long userId);
 
-    List<ItemDto> findItemByText(String text);
+    List<ItemDto> findItemByText(String text, int from, int size);
 
     CommentDto addCommentToItem(Long userDto, Long itemDto, CommentDto dto);
+
+    List<ItemDto> findAllPageable(Long userId, int from,int size);
 
 
 }

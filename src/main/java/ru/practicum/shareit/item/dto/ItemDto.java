@@ -10,6 +10,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 public class ItemDto implements Serializable {
 
 
@@ -21,6 +22,7 @@ public class ItemDto implements Serializable {
     private Boolean available;
     private ItemDtoLastNextBooking lastBooking;
     private ItemDtoLastNextBooking nextBooking;
+    private Long requestId;
     private Set<CommentDto> comments;
 
 }

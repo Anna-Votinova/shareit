@@ -1,7 +1,11 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.Utils;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -13,6 +17,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -32,20 +38,31 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
 
     private final CommentRepository commentRepository;
+
+    private final ItemRequestRepository itemRequestRepository;
     private final ItemMapper mapper;
+
+    private final CommentMapper commentMapper;
+
 
     @Override
     public ItemDto create(Long userId, ItemDto dto) {
         if (dto.getAvailable() == null) {
             throw new ValidationException("Все поля должны быть заполнены");
         } else {
-            Optional<User> user = userRepository.findById(userId);
-            if (user.isPresent()) {
-                Item item = mapper.fromDto(dto);
-                item.setOwner(user.get());
-                return mapper.fromItem(itemRepository.save(item));
+            User user = userRepository.findById(userId).orElseThrow(
+                    () -> new IllegalArgumentException("Юзер с id " + userId + " не существует"));
+
+            Item item = mapper.fromDto(dto);
+            item.setOwner(user);
+            if (dto.getRequestId() != null) {
+                ItemRequest iReq = itemRequestRepository.findById(dto.getRequestId()).orElseThrow(
+                        () -> new IllegalArgumentException("Запроса с id " + dto.getRequestId() + " не существует"));
+                item.setRequest(iReq);
             }
-            throw new IllegalArgumentException("Юзер с id " + userId + " не существует");
+
+            return mapper.fromItem(itemRepository.save(item));
+
         }
     }
 
@@ -72,19 +89,22 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> findAll(Long userId) {
+    public List<ItemDto> findAllPageable(Long userId, int from, int size) {
 
-        List<Item> userItems = itemRepository.findAllByOwnerId(userId);
+        Utils.checkFromAndSize(from, size);
+        Pageable pageable = PageRequest.of(from, size);
+        Page<Item> userItems = itemRepository.findAllByOwnerId(userId, pageable);
+
+        if (userItems.isEmpty()) {
+            throw new IllegalArgumentException("Ни один айтем не найден");
+        }
+
         List<ItemDto> resultList = new ArrayList<>();
 
         userItems.forEach(i -> {
             ItemDto dto = getAndSetLastAndNextBooking(mapper.fromItem(i));
             resultList.add(addCommentsToItemDto(dto));
         });
-
-        if (resultList.isEmpty()) {
-            throw new IllegalArgumentException("Ни один айтем не найден");
-        }
 
         return resultList;
     }
@@ -123,7 +143,7 @@ public class ItemServiceImpl implements ItemService {
         Set<CommentDto> commentDto =
                 commentRepository.findAllByItemId(dto.getId())
                         .stream()
-                        .map(CommentMapper::toDto)
+                        .map(commentMapper::toDto)
                         .collect(Collectors.toSet());
 
        dto.setComments(commentDto);
@@ -131,11 +151,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> findItemByText(String text) {
+    public List<ItemDto> findItemByText(String text, int from, int size) {
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.search(text)
+        Utils.checkFromAndSize(from, size);
+
+        return itemRepository.search(text, PageRequest.of(from, size))
                 .stream()
                 .map(mapper::fromItem)
                 .collect(Collectors.toList());
@@ -155,12 +177,12 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("Юзер " + userId + " не может оставить комментарий, " +
                     "так как еще не бронировал вещь " + itemId);
         }
-        Comment comment = CommentMapper.fromDto(dto);
+        Comment comment = commentMapper.fromDto(dto);
         comment.setItem(item);
         comment.setAuthor(user);
         comment.setCreated(Timestamp.valueOf(LocalDateTime.now()));
         comment = commentRepository.save(comment);
-        return CommentMapper.toDto(comment);
+        return commentMapper.toDto(comment);
     }
 
 
