@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDtoToResponse;
 import ru.practicum.shareit.booking.dto.ItemDtoBookingToResponse;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         properties = "db.name=test",
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingIntegrationTest {
 
