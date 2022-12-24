@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +19,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest(
         properties = "db.name=test",
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ItemRequestIntegrationTest {
 
     private final UserRepository userRepository;
@@ -35,14 +37,18 @@ public class ItemRequestIntegrationTest {
     @Autowired
     private ItemRequestRepository itemRequestRepository;
 
-    @DisplayName("Integration test for findAllPageable method")
-    @Test
-    public void givenUserIdAhdFromAndSize_whenFindAllPageable_thenReturnListBookingDto() {
+    private User user1;
 
-        int from = 0;
-        int size = 5;
+    private int from;
 
-        User user1 = new User(null, "Anna", "anna13@36on.ru");
+    private int  size;
+
+    @BeforeEach
+    public void setUp() {
+        from = 0;
+        size = 5;
+
+        user1 = new User(null, "Anna", "anna13@36on.ru");
         User user2 = new User(null, "Olga", "olga@gmail.com");
         user1 = userRepository.save(user1);
         user2 = userRepository.save(user2);
@@ -69,6 +75,11 @@ public class ItemRequestIntegrationTest {
         item1.setRequest(newReq);
 
         itemRepository.save(item1);
+    }
+
+    @DisplayName("Integration test for findAllPageable method")
+    @Test
+    public void givenUserIdAhdFromAndSize_whenFindAllPageable_thenReturnListBookingDto() {
 
 
         List<ItemRequestDto> itemRequestDtoList = itemRequestController.findAllPageable(user1.getId(), from, size);
@@ -76,5 +87,39 @@ public class ItemRequestIntegrationTest {
         assertThat(itemRequestDtoList.size()).isEqualTo(2);
         assertThat(itemRequestDtoList.get(0).getId()).isEqualTo(2);
         assertThat(itemRequestDtoList.get(0).getItems().get(0).getName()).isEqualTo("Лопата");
+    }
+
+    @DisplayName("Integration test for findAllPageable method (negative scenario)")
+    @Test
+    public void givenIncorrectUserid_whenFindAllPageable_thenThrowException() {
+
+        assertThrows(IllegalArgumentException.class,
+                () -> itemRequestController.findAllPageable(100L, from, size));
+
+    }
+
+    @DisplayName("Integration test for findAllPageable method ")
+    @Test
+    public void givenSize1AndFrom1_whenFindAllPageable_thenReturnOnePage() {
+
+        from = 1;
+        size = 1;
+
+        List<ItemRequestDto> itemRequestDtoList = itemRequestController.findAllPageable(user1.getId(), from, size);
+
+        assertThat(itemRequestDtoList.size()).isEqualTo(1);
+        assertThat(itemRequestDtoList.get(0).getId()).isEqualTo(1);
+    }
+
+    @DisplayName("Integration test for findAllPageable method ")
+    @Test
+    public void givenSize2AndFrom1_whenFindAllPageable_thenReturnEmptyList() {
+
+        from = 1;
+        size = 2;
+
+        List<ItemRequestDto> itemRequestDtoList = itemRequestController.findAllPageable(user1.getId(), from, size);
+
+        assertThat(itemRequestDtoList).isEmpty();
     }
 }

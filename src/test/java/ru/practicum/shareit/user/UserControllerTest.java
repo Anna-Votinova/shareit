@@ -66,7 +66,8 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+                .andExpect(jsonPath("$.email", is(userDto.getEmail())))
+                .andDo(MockMvcResultHandlers.print());
     }
 
     @DisplayName("MockMvc test for create method(negative scenario)")

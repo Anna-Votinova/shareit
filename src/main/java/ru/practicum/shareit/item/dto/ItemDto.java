@@ -10,7 +10,6 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 public class ItemDto implements Serializable {
 
 

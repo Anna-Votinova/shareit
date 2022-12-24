@@ -28,7 +28,7 @@ public class ItemRequestDtoJsonTest {
     private JacksonTester<ItemRequestDto> json;
 
     @Test
-    void testItemRequestDtoWhenFillWithCorrectArgumentsThenPositive() throws Exception {
+    void testItemRequestDto_whenFillWithCorrectArguments_thenReturnItemDtoWithoutItems() throws Exception {
 
         ItemRequestDto dto = ItemRequestDto.builder()
                 .id(1L)
@@ -48,7 +48,36 @@ public class ItemRequestDtoJsonTest {
     }
 
     @Test
-    void testItemRequestDtoWhenFillWithEmptyDescriptionThenFail() {
+    void testItemRequestDto_whenFillWithCorrectArguments_thenReturnItemDtoWithItems() throws Exception {
+
+        ItemRequestInfo info = ItemRequestInfo.builder()
+                .id(1L)
+                .name("Щетка для кота")
+                .description("Щетка для всех пород котов")
+                .available(true)
+                .requestId(1L)
+                .build();
+
+        ItemRequestDto dto = ItemRequestDto.builder()
+                .id(1L)
+                .description("Хотел бы взять в аренду чесалку для кота")
+                .created(LocalDateTime.parse("2022-12-18T20:00:57"))
+                .items(List.of(info))
+                .build();
+
+        JsonContent<ItemRequestDto> result = json.write(dto);
+
+        assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
+        assertThat(result).extractingJsonPathStringValue("$.description")
+                .isEqualTo("Хотел бы взять в аренду чесалку для кота");
+        assertThat(result).extractingJsonPathStringValue("$.created").isEqualTo("2022-12-18T20:00:57");
+        assertThat(result).extractingJsonPathValue("$.items").isNotNull();
+        assertThat(result).extractingJsonPathValue("$.items[0].name").isEqualTo("Щетка для кота");
+
+    }
+
+    @Test
+    void testItemRequestDto_whenFillWithEmptyDescription_thenFail() {
 
         ItemRequestDto dto = ItemRequestDto.builder()
                 .id(1L)
@@ -63,7 +92,7 @@ public class ItemRequestDtoJsonTest {
     }
 
     @Test
-    void testItemRequestDtoWhenFillWithBlancDescriptionThenFail() {
+    void testItemRequestDto_whenFillWithBlankDescription_thenFail() {
 
         ItemRequestDto dto = ItemRequestDto.builder()
                 .id(1L)
@@ -78,7 +107,7 @@ public class ItemRequestDtoJsonTest {
     }
 
     @Test
-    void testItemRequestDtoWhenFillWithNullDescriptionThenFail() {
+    void testItemRequestDto_whenFillWithNullDescription_thenFail() {
 
         ItemRequestDto dto = ItemRequestDto.builder()
                 .id(1L)

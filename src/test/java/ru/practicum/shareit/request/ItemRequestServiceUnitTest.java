@@ -9,16 +9,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
+import javax.validation.ValidationException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,8 +29,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemRequestServiceUnitTest {
-
-
 
     @Mock
     ItemRequestRepository itemRequestRepository;
@@ -95,9 +94,19 @@ public class ItemRequestServiceUnitTest {
         assertThat(savedDto).isEqualTo(dto);
     }
 
+    @DisplayName("JUnit test for addNewRequest method (negative scenario) ")
+    @Test
+    public void givenWrongItemRequestId_whenAddNewRequest_thenThrowException() {
+        given(userRepository.findById(-1L)).willThrow(IllegalArgumentException.class);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> itemRequestService.addNewRequest(-1L, dto));
+
+    }
+
     @DisplayName("JUnit test for findAll method")
     @Test
-    public void givenUserId_whenFindAll_thenReturnListOfItemRequestDto() {
+    public void givenUserId_whenFindAll_thenReturnListOfItemRequestDtoWithoutItems() {
         given(userRepository.existsById(anyLong())).willReturn(true);
         given(itemRequestRepository.findAllByRequesterId(1L, SORT)).willReturn(List.of(request));
         given(itemRequestMapper.toDto(request)).willReturn(dto);
@@ -106,6 +115,92 @@ public class ItemRequestServiceUnitTest {
         List<ItemRequestDto> dtoList = itemRequestService.findAll(1L);
 
         assertThat(dtoList.size()).isEqualTo(1);
+        assertThat(dtoList.get(0).getItems().size()).isEqualTo(0);
+
+    }
+
+    @DisplayName("JUnit test for findAll method")
+    @Test
+    public void givenUserId_whenFindAll_thenReturnListOfItemRequestDtoWithItems() {
+
+        Item item = new Item(1L,"Щетка для кота","Щетка для всех пород котов",true);
+
+        given(userRepository.existsById(anyLong())).willReturn(true);
+        given(itemRequestRepository.findAllByRequesterId(1L, SORT)).willReturn(List.of(request));
+        given(itemRequestMapper.toDto(request)).willReturn(dto);
+        given(itemRepository.findAllByRequestId(request.getId())).willReturn(List.of(item));
+
+        List<ItemRequestDto> dtoList = itemRequestService.findAll(1L);
+
+        assertThat(dtoList.size()).isEqualTo(1);
+        assertThat(dtoList.get(0).getItems().size()).isEqualTo(1);
+        assertThat(dtoList.get(0).getItems().get(0).getDescription()).isEqualTo("Щетка для всех пород котов");
+
+    }
+
+    @DisplayName("JUnit test for findAll method")
+    @Test
+    public void givenUserId_whenFindAll_thenReturnSortedListOfItemRequestDtoWithoutItems() {
+
+        User user2 = new User(2L, "Olga", "olga@gmail.com");
+
+        ItemRequest newReq = ItemRequest.builder()
+                .id(2L)
+                .description("Нужна лопата")
+                .created(Timestamp.valueOf(LocalDateTime.parse("2022-12-20T20:00:57")))
+                .requester(user2)
+                .build();
+
+        ItemRequestDto dto2 = ItemRequestDto.builder()
+                .id(2L)
+                .description("Нужна лопата")
+                .created(LocalDateTime.parse("2022-12-20T20:00:57"))
+                .build();
+
+        List<ItemRequest> requests = new ArrayList<>(Arrays.asList(request, newReq));
+
+       requests = requests
+                .stream()
+                .sorted(Comparator.comparing(ItemRequest::getCreated).reversed())
+                .collect(Collectors.toList());
+
+        given(userRepository.existsById(anyLong())).willReturn(true);
+        given(itemRequestRepository.findAllByRequesterId(1L, SORT)).willReturn(requests);
+        given(itemRequestMapper.toDto(request)).willReturn(dto);
+        given(itemRequestMapper.toDto(newReq)).willReturn(dto2);
+        given(itemRepository.findAllByRequestId(request.getId())).willReturn(Collections.emptyList());
+        given(itemRepository.findAllByRequestId(newReq.getId())).willReturn(Collections.emptyList());
+
+        List<ItemRequestDto> sortedDtoList = itemRequestService.findAll(1L);
+
+        assertThat(sortedDtoList.size()).isEqualTo(2);
+        assertThat(sortedDtoList.get(0).getId()).isEqualTo(2);
+        assertThat(sortedDtoList.get(1).getId()).isEqualTo(1);
+        assertThat(sortedDtoList.get(0).getItems().size()).isEqualTo(0);
+        assertThat(sortedDtoList.get(1).getItems().size()).isEqualTo(0);
+
+    }
+
+    @DisplayName("JUnit test for findAll method")
+    @Test
+    public void givenUserId_whenFindAll_thenReturnEmptyListOfItemRequestDto() {
+        given(userRepository.existsById(anyLong())).willReturn(true);
+        given(itemRequestRepository.findAllByRequesterId(1L, SORT)).willReturn(Collections.emptyList());
+
+        List<ItemRequestDto> dtoList = itemRequestService.findAll(1L);
+
+        assertThat(dtoList.size()).isEqualTo(0);
+
+    }
+
+
+    @DisplayName("JUnit test for findAll method (negative scenario)")
+    @Test
+    public void givenUserId_whenFindAll_thenThrowException() {
+        given(userRepository.existsById(anyLong())).willReturn(false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> itemRequestService.findAll(-1L));
 
     }
 
@@ -160,6 +255,36 @@ public class ItemRequestServiceUnitTest {
         assertThat(emptyList.size()).isEqualTo(0);
     }
 
+    @DisplayName("JUnit test for findAllPageable method (negative scenario)")
+    @Test
+    public void givenUserId_whenFindAllPageable_thenThrowException() {
+        given(userRepository.existsById(anyLong())).willReturn(false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> itemRequestService.findAllPageable(-1L, 1, 1));
+
+    }
+
+    @DisplayName("JUnit test for findAllPageable method (negative scenario)")
+    @Test
+    public void givenUserIdAndWrongSize_whenFindAllPageable_thenThrowException() {
+        given(userRepository.existsById(anyLong())).willReturn(true);
+
+        assertThrows(ValidationException.class,
+                () -> itemRequestService.findAllPageable(1L, 1, 0));
+
+    }
+
+    @DisplayName("JUnit test for findAllPageable method (negative scenario)")
+    @Test
+    public void givenUserIdAndWrongFrom_whenFindAllPageable_thenThrowException() {
+        given(userRepository.existsById(anyLong())).willReturn(true);
+
+        assertThrows(ValidationException.class,
+                () -> itemRequestService.findAllPageable(1L, -1, 1));
+
+    }
+
 
     @DisplayName("JUnit test for findItemRequestById method")
     @Test
@@ -185,6 +310,16 @@ public class ItemRequestServiceUnitTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> itemRequestService.findItemRequestById(user.getId(), -1L));
+
+    }
+
+    @DisplayName("JUnit test for FindItemRequestById method (negative scenario)")
+    @Test
+    public void givenUserId_whenFindItemRequestById_thenThrowException() {
+        given(userRepository.existsById(anyLong())).willReturn(false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> itemRequestService.findItemRequestById(-1L, 1L));
 
     }
 

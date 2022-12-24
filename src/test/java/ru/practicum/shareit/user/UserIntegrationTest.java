@@ -16,13 +16,14 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest(
         properties = "db.name=test",
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class UserIntegrationTest {
 
 
@@ -49,6 +50,13 @@ public class UserIntegrationTest {
         assertThat(savedList.get(1).getName(), equalTo(user2.getName()));
         assertThat(savedList.get(1).getEmail(), equalTo(user2.getEmail()));
 
+    }
+
+    @DisplayName("Integration test for findAll method (negative scenario)")
+    @Test
+    public void givenNoUsers_whenGetAllUsers_thenThrowException() {
+
+        assertThrows(IllegalArgumentException.class, userController::getAllUsers);
     }
 
 }

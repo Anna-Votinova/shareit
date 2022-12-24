@@ -34,7 +34,7 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final UnknownStateException e) {
+    public ErrorResponse handleUnknownStateException(final UnknownStateException e) {
         return new ErrorResponse("Unknown state: " + e.getMessage(), "Неизвестное состояние запоса");
     }
 
