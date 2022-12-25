@@ -1,13 +1,13 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.Booking;
 
 import java.sql.Timestamp;
 
 @Component
-@Getter
+@RequiredArgsConstructor
 public class BookingMapper {
 
     public Booking fromDto(BookingDtoFromRequest dto) {

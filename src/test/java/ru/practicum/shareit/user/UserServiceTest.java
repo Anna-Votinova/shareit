@@ -77,6 +77,9 @@ public class UserServiceTest {
         assertThat(savedUser).isNotNull();
         assertThat(savedUser).isEqualTo(userDto);
 
+        verify(userRepository, times(1))
+                .save(any());
+
     }
 
     @DisplayName("JUnit test for create method which throws exception")
@@ -103,6 +106,9 @@ public class UserServiceTest {
 
         assertThrows(RuntimeException.class, () -> userService.create(userDto2));
 
+        verify(userRepository, times(1))
+                .save(any());
+
     }
 
     @DisplayName("JUnit test for getAll method")
@@ -124,6 +130,9 @@ public class UserServiceTest {
         assertThat(userDtoList).isNotNull();
         assertThat(userDtoList.size()).isEqualTo(2);
 
+        verify(userRepository, times(1))
+                .findAll();
+
 
     }
 
@@ -134,6 +143,9 @@ public class UserServiceTest {
         given(userRepository.findAll()).willReturn(Collections.emptyList());
 
         assertThrows(IllegalArgumentException.class, () -> userService.getAll());
+
+        verify(userRepository, times(1))
+                .findAll();
 
     }
 
@@ -149,6 +161,9 @@ public class UserServiceTest {
 
         assertThat(savedUser).isNotNull();
 
+        verify(userRepository, times(1))
+                .findById(any());
+
     }
 
     @DisplayName("JUnit test for getUserById method (negative scenario)")
@@ -158,6 +173,9 @@ public class UserServiceTest {
         given(userRepository.findById(-1L)).willThrow(IllegalArgumentException.class);
 
         assertThrows(IllegalArgumentException.class, () -> userService.getUserById(-1L));
+
+        verify(userRepository, times(1))
+                .findById(any());
 
     }
 
@@ -178,6 +196,25 @@ public class UserServiceTest {
 
         assertThat(updatedUser.get().getEmail()).isEqualTo("anna@gmail.com");
         assertThat(updatedUser.get().getName()).isEqualTo("Anya");
+
+        verify(userRepository, times(1))
+                .findById(any());
+
+        verify(userRepository, times(1))
+                .save(any());
+
+    }
+
+    @DisplayName("JUnit test for updateUser method (negative scenario)")
+    @Test
+    public void givenUserDtoInCorrectId_whenUpdateUser_thenThrowsException() {
+
+        given(userRepository.findById(-1L)).willThrow(IllegalArgumentException.class);
+
+        assertThrows(IllegalArgumentException.class, () -> userService.update(-1L, userDto));
+
+        verify(userRepository, times(0))
+                .save(any());
 
     }
 

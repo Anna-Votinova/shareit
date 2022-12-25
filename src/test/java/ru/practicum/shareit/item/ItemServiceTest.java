@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -132,6 +132,12 @@ public class ItemServiceTest {
         assertThat(savedDto).isNotNull();
         assertThat(savedDto).isEqualTo(itemDto);
 
+        verify(userRepository, times(1))
+                .findById(any());
+
+        verify(itemRepository, times(1))
+                .save(any());
+
     }
 
     @DisplayName("JUnit test for create method")
@@ -169,6 +175,16 @@ public class ItemServiceTest {
         assertThat(savedDto).isEqualTo(itemDto);
         assertThat(savedDto.getRequestId()).isEqualTo(iReq.getId());
 
+
+        verify(userRepository, times(1))
+                .findById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findById(any());
+
+        verify(itemRepository, times(1))
+                .save(any());
+
     }
 
     @DisplayName("JUnit test for create method (negative scenario)")
@@ -179,6 +195,15 @@ public class ItemServiceTest {
 
         assertThrows(ValidationException.class, () -> itemService.create(user.getId(), itemDto));
 
+        verify(userRepository, times(0))
+                .findById(any());
+
+        verify(itemRequestRepository, times(0))
+                .findById(any());
+
+        verify(itemRepository, times(0))
+                .save(any());
+
     }
 
     @DisplayName("JUnit test for create method (negative scenario)")
@@ -188,6 +213,42 @@ public class ItemServiceTest {
         given(userRepository.findById(-1L)).willThrow(IllegalArgumentException.class);
 
         assertThrows(IllegalArgumentException.class, () -> itemService.create(-1L, itemDto));
+
+        verify(userRepository, times(1))
+                .findById(any());
+
+        verify(itemRequestRepository, times(0))
+                .findById(any());
+
+        verify(itemRepository, times(0))
+                .save(any());
+
+    }
+
+    @DisplayName("JUnit test for create method (negative scenario)")
+    @Test
+    public void givenItemDtoWithWrongRequestId_whenCreateItem_thenThrowException() {
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        itemDto.setRequestId(125L);
+
+        given(mapper.fromDto(itemDto)).willReturn(item);
+
+        item.setOwner(user);
+
+        given(itemRequestRepository.findById(itemDto.getRequestId())).willThrow(IllegalArgumentException.class);
+
+        assertThrows(IllegalArgumentException.class, () -> itemService.create(1L, itemDto));
+
+        verify(userRepository, times(1))
+                .findById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findById(any());
+
+        verify(itemRepository, times(0))
+                .save(any());
 
     }
 
@@ -215,6 +276,14 @@ public class ItemServiceTest {
 
         assertThat(updateItem.get().getName()).isEqualTo("Щетка для британцев и не только");
         assertThat(updateItem.get().getAvailable()).isFalse();
+
+
+        verify(itemRepository, times(1))
+                .findByIdAndOwnerId(any(), any());
+
+        verify(itemRepository, times(1))
+                .save(any());
+
     }
 
     @DisplayName("JUnit test for update method (negative scenario)")
@@ -224,6 +293,12 @@ public class ItemServiceTest {
         given(itemRepository.findByIdAndOwnerId(1L, 3L)).willThrow(IllegalArgumentException.class);
 
         assertThrows(IllegalArgumentException.class, () -> itemService.update(3L, 1L, itemDto));
+
+        verify(itemRepository, times(1))
+                .findByIdAndOwnerId(any(), any());
+
+        verify(itemRepository, times(0))
+                .save(any());
 
     }
 
@@ -241,6 +316,15 @@ public class ItemServiceTest {
 
         assertThat(itemFound).isNotNull();
         assertThat(itemFound).isEqualTo(Optional.of(itemDto));
+
+        verify(itemRepository, times(1))
+                .findById(any());
+
+        verify(commentRepository, times(1))
+                .findAllByItemId(any());
+
+        verify(bookingRepository, times(1))
+                .findAllByItemId(any());
     }
 
     @DisplayName("JUnit test for getItemByIdForAllUser method (negative scenario)")
@@ -250,6 +334,15 @@ public class ItemServiceTest {
         given(itemRepository.findById(99L)).willThrow(IllegalArgumentException.class);
 
         assertThrows(IllegalArgumentException.class, () -> itemService.getItemByIdForAllUser(1L, 99L));
+
+        verify(itemRepository, times(1))
+                .findById(any());
+
+        verify(commentRepository, times(0))
+                .findAllByItemId(any());
+
+        verify(bookingRepository, times(0))
+                .findAllByItemId(any());
 
     }
 
@@ -270,6 +363,15 @@ public class ItemServiceTest {
         assertThat(itemDtoList.size()).isEqualTo(1);
         assertThat(itemDtoList.get(0)).isEqualTo(itemDto);
 
+        verify(itemRepository, times(1))
+                .findAllByOwnerId(1L, PageRequest.of(0, 2));
+
+        verify(commentRepository, times(1))
+                .findAllByItemId(any());
+
+        verify(bookingRepository, times(1))
+                .findAllByItemId(any());
+
     }
 
     @DisplayName("JUnit test for findAllPageable method (negative scenario)")
@@ -281,6 +383,15 @@ public class ItemServiceTest {
 
         assertThrows(ValidationException.class, () -> itemService.findAllPageable(1L, from, size));
 
+        verify(itemRepository, times(0))
+                .findAllByOwnerId(1L, PageRequest.of(1, 1));
+
+        verify(commentRepository, times(0))
+                .findAllByItemId(any());
+
+        verify(bookingRepository, times(0))
+                .findAllByItemId(any());
+
     }
 
     @DisplayName("JUnit test for findAllPageable method (negative scenario)")
@@ -291,6 +402,15 @@ public class ItemServiceTest {
         int size = 0;
 
         assertThrows(ValidationException.class, () -> itemService.findAllPageable(1L, from, size));
+
+        verify(itemRepository, times(0))
+                .findAllByOwnerId(1L, PageRequest.of(1, 1));
+
+        verify(commentRepository, times(0))
+                .findAllByItemId(any());
+
+        verify(bookingRepository, times(0))
+                .findAllByItemId(any());
 
     }
 
@@ -307,11 +427,20 @@ public class ItemServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> itemService.findAllPageable(3L, from, size));
 
+        verify(itemRepository, times(1))
+                .findAllByOwnerId(3L, PageRequest.of(from, size));
+
+        verify(commentRepository, times(0))
+                .findAllByItemId(any());
+
+        verify(bookingRepository, times(0))
+                .findAllByItemId(any());
+
     }
 
     @DisplayName("JUnit test for findItemByText method")
     @Test
-    public void givenBlankText_whenGetListItemDtoByText_thenReturnEmptyListOfItemDto() {
+    public void givenEmptyText_whenGetListItemDtoByText_thenReturnEmptyListOfItemDto() {
 
         String text = "";
         int from = 1;
@@ -320,6 +449,25 @@ public class ItemServiceTest {
         List<ItemDto> retrievedDto = itemService.findItemByText(text, from, size);
 
         assertThat(retrievedDto).isEmpty();
+
+        verify(itemRepository, times(0))
+                .search(text, PageRequest.of(from, size));
+    }
+
+    @DisplayName("JUnit test for findItemByText method")
+    @Test
+    public void givenBlankText_whenGetListItemDtoByText_thenReturnEmptyListOfItemDto() {
+
+        String text = " ";
+        int from = 1;
+        int size = 1;
+
+        List<ItemDto> retrievedDto = itemService.findItemByText(text, from, size);
+
+        assertThat(retrievedDto).isEmpty();
+
+        verify(itemRepository, times(0))
+                .search(text, PageRequest.of(from, size));
     }
 
     @DisplayName("JUnit test for findItemByText method")
@@ -340,6 +488,9 @@ public class ItemServiceTest {
 
         assertThat(retrievedDto.size()).isEqualTo(1);
         assertThat(retrievedDto.get(0)).isEqualTo(itemDto);
+
+        verify(itemRepository, times(1))
+                .search(text, PageRequest.of(from, size));
     }
 
     @DisplayName("JUnit test for addCommentToItem method")
@@ -389,6 +540,15 @@ public class ItemServiceTest {
         assertThat(savedComment.getText()).isEqualTo("Хорошая щетка, моему коту подошла");
 
 
+        verify(userRepository, times(1))
+                .findById(any());
+        verify(itemRepository, times(1))
+                .findById(any());
+        verify(bookingRepository, times(1))
+                .findAllByItemIdAndBookerIdAndEndBefore(any(), any(), any());
+        verify(commentRepository, times(1))
+                .save(any());
+
     }
 
     @DisplayName("JUnit test for addCommentToItem method (negative scenario)")
@@ -409,6 +569,67 @@ public class ItemServiceTest {
                 any(), any(), any())).willReturn(Collections.emptyList());
 
         assertThrows(ValidationException.class, () -> itemService.addCommentToItem(1L, 1L, commentDto));
+
+        verify(userRepository, times(1))
+                .findById(any());
+        verify(itemRepository, times(1))
+                .findById(any());
+        verify(bookingRepository, times(1))
+                .findAllByItemIdAndBookerIdAndEndBefore(any(), any(), any());
+        verify(commentRepository, times(0))
+                .save(any());
+
+    }
+
+    @DisplayName("JUnit test for addCommentToItem method (negative scenario)")
+    @Test
+    public void givenCommentAndUserIdWrong_whenAddCommentToItem_thenThrowException() {
+
+        CommentDto commentDto = CommentDto.builder()
+                .id(1L)
+                .text("Хорошая щетка, моему коту подошла")
+                .authorName("Alla")
+                .build();
+
+        given(userRepository.findById(-1L)).willThrow(IllegalArgumentException.class);
+
+        assertThrows(IllegalArgumentException.class, () -> itemService.addCommentToItem(-1L, 1L, commentDto));
+
+        verify(userRepository, times(1))
+                .findById(any());
+        verify(itemRepository, times(0))
+                .findById(any());
+        verify(bookingRepository, times(0))
+                .findAllByItemIdAndBookerIdAndEndBefore(any(), any(), any());
+        verify(commentRepository, times(0))
+                .save(any());
+
+    }
+
+    @DisplayName("JUnit test for addCommentToItem method (negative scenario)")
+    @Test
+    public void givenCommentAndItemIdWrong_whenAddCommentToItem_thenThrowException() {
+
+        CommentDto commentDto = CommentDto.builder()
+                .id(1L)
+                .text("Хорошая щетка, моему коту подошла")
+                .authorName("Alla")
+                .build();
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(itemRepository.findById(-1L)).willThrow(IllegalArgumentException.class);
+
+        assertThrows(IllegalArgumentException.class, () -> itemService.addCommentToItem(
+                1L, -1L, commentDto));
+
+        verify(userRepository, times(1))
+                .findById(any());
+        verify(itemRepository, times(1))
+                .findById(any());
+        verify(bookingRepository, times(0))
+                .findAllByItemIdAndBookerIdAndEndBefore(any(), any(), any());
+        verify(commentRepository, times(0))
+                .save(any());
 
     }
 

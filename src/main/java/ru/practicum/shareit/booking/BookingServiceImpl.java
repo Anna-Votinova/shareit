@@ -152,10 +152,12 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDtoToResponse> getBookingsAllOrByStateForEveryUserItem(
             Long userId, BookingState state, int from, int size) {
 
+        Utils.checkFromAndSize(from, size);
+
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("Пользователя " + userId + " не существует");
         }
-        Utils.checkFromAndSize(from, size);
+
 
         Pageable pageable = PageRequest.of(from, size, SORT);
         Page<Booking> bookingsForItems;

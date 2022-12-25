@@ -1,12 +1,12 @@
 package ru.practicum.shareit.item.mapper;
 
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.dto.CommentDto;
 
 @Component
-@Getter
+@RequiredArgsConstructor
 public class CommentMapper {
 
     public Comment fromDto(CommentDto dto) {

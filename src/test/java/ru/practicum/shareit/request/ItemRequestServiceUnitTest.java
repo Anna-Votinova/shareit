@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemRequestServiceUnitTest {
@@ -92,6 +92,12 @@ public class ItemRequestServiceUnitTest {
 
         assertThat(savedDto).isNotNull();
         assertThat(savedDto).isEqualTo(dto);
+
+        verify(userRepository, times(1))
+                .findById(any());
+
+        verify(itemRequestRepository, times(1))
+                .save(any());
     }
 
     @DisplayName("JUnit test for addNewRequest method (negative scenario) ")
@@ -101,6 +107,12 @@ public class ItemRequestServiceUnitTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> itemRequestService.addNewRequest(-1L, dto));
+
+        verify(userRepository, times(1))
+                .findById(any());
+
+        verify(itemRequestRepository, times(0))
+                .save(any());
 
     }
 
@@ -116,6 +128,16 @@ public class ItemRequestServiceUnitTest {
 
         assertThat(dtoList.size()).isEqualTo(1);
         assertThat(dtoList.get(0).getItems().size()).isEqualTo(0);
+
+
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findAllByRequesterId(any(), any());
+
+        verify(itemRepository, times(1))
+                .findAllByRequestId(any());
 
     }
 
@@ -135,6 +157,15 @@ public class ItemRequestServiceUnitTest {
         assertThat(dtoList.size()).isEqualTo(1);
         assertThat(dtoList.get(0).getItems().size()).isEqualTo(1);
         assertThat(dtoList.get(0).getItems().get(0).getDescription()).isEqualTo("Щетка для всех пород котов");
+
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findAllByRequesterId(any(), any());
+
+        verify(itemRepository, times(1))
+                .findAllByRequestId(any());
 
     }
 
@@ -179,6 +210,15 @@ public class ItemRequestServiceUnitTest {
         assertThat(sortedDtoList.get(0).getItems().size()).isEqualTo(0);
         assertThat(sortedDtoList.get(1).getItems().size()).isEqualTo(0);
 
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findAllByRequesterId(any(), any());
+
+        verify(itemRepository, times(2))
+                .findAllByRequestId(any());
+
     }
 
     @DisplayName("JUnit test for findAll method")
@@ -191,6 +231,13 @@ public class ItemRequestServiceUnitTest {
 
         assertThat(dtoList.size()).isEqualTo(0);
 
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findAllByRequesterId(any(), any());
+
+
     }
 
 
@@ -201,6 +248,15 @@ public class ItemRequestServiceUnitTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> itemRequestService.findAll(-1L));
+
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(0))
+                .findAllByRequesterId(any(), any());
+
+        verify(itemRepository, times(0))
+                .findAllByRequestId(any());
 
     }
 
@@ -239,6 +295,15 @@ public class ItemRequestServiceUnitTest {
 
         assertThat(finalList.size()).isEqualTo(2);
         assertThat(finalList.get(0).getId()).isEqualTo(2);
+
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findAll(PageRequest.of(0, 5, SORT));
+
+        verify(itemRepository, times(2))
+                .findAllByRequestId(any());
     }
 
 
@@ -253,6 +318,15 @@ public class ItemRequestServiceUnitTest {
         List<ItemRequestDto> emptyList = itemRequestService.findAllPageable(user.getId(), 0, 5);
 
         assertThat(emptyList.size()).isEqualTo(0);
+
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findAll(PageRequest.of(0, 5, SORT));
+
+        verify(itemRepository, times(0))
+                .findAllByRequestId(any());
     }
 
     @DisplayName("JUnit test for findAllPageable method (negative scenario)")
@@ -262,6 +336,15 @@ public class ItemRequestServiceUnitTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> itemRequestService.findAllPageable(-1L, 1, 1));
+
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(0))
+                .findAll(PageRequest.of(0, 5, SORT));
+
+        verify(itemRepository, times(0))
+                .findAllByRequestId(any());
 
     }
 
@@ -273,6 +356,15 @@ public class ItemRequestServiceUnitTest {
         assertThrows(ValidationException.class,
                 () -> itemRequestService.findAllPageable(1L, 1, 0));
 
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(0))
+                .findAll(PageRequest.of(0, 5, SORT));
+
+        verify(itemRepository, times(0))
+                .findAllByRequestId(any());
+
     }
 
     @DisplayName("JUnit test for findAllPageable method (negative scenario)")
@@ -282,6 +374,15 @@ public class ItemRequestServiceUnitTest {
 
         assertThrows(ValidationException.class,
                 () -> itemRequestService.findAllPageable(1L, -1, 1));
+
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(0))
+                .findAll(PageRequest.of(0, 5, SORT));
+
+        verify(itemRepository, times(0))
+                .findAllByRequestId(any());
 
     }
 
@@ -299,6 +400,15 @@ public class ItemRequestServiceUnitTest {
         assertThat(findDto).isNotNull();
         assertThat(findDto.getId()).isEqualTo(1);
 
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findById(any());
+
+        verify(itemRepository, times(1))
+                .findAllByRequestId(any());
+
     }
 
     @DisplayName("JUnit test for findItemRequestById method (negative scenario) ")
@@ -311,6 +421,15 @@ public class ItemRequestServiceUnitTest {
         assertThrows(IllegalArgumentException.class,
                 () -> itemRequestService.findItemRequestById(user.getId(), -1L));
 
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(1))
+                .findById(any());
+
+        verify(itemRepository, times(0))
+                .findAllByRequestId(any());
+
     }
 
     @DisplayName("JUnit test for FindItemRequestById method (negative scenario)")
@@ -320,6 +439,15 @@ public class ItemRequestServiceUnitTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> itemRequestService.findItemRequestById(-1L, 1L));
+
+        verify(userRepository, times(1))
+                .existsById(any());
+
+        verify(itemRequestRepository, times(0))
+                .findById(any());
+
+        verify(itemRepository, times(0))
+                .findAllByRequestId(any());
 
     }
 

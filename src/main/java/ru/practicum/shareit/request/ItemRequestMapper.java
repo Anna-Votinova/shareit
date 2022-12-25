@@ -1,6 +1,6 @@
 package ru.practicum.shareit.request;
 
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Component
-@Getter
+@RequiredArgsConstructor
 public class ItemRequestMapper {
 
     public ItemRequest fromDto(ItemRequestDto dto) {
