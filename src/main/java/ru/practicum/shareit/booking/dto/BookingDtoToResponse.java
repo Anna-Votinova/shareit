@@ -22,4 +22,16 @@ public class BookingDtoToResponse implements Serializable {
     private UserDtoBookingToResponse booker;
     private ItemDtoBookingToResponse item;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BookingDtoToResponse)) return false;
+        return id != null && id.equals(((BookingDtoToResponse) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
 }
