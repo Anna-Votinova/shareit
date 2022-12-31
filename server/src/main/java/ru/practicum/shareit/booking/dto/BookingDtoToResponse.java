@@ -7,6 +7,8 @@ import ru.practicum.shareit.booking.BookingStatus;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import static ru.practicum.shareit.Constants.DATE_TIME;
+
 @ToString
 @Getter
 @Setter
@@ -14,9 +16,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BookingDtoToResponse implements Serializable {
     private Long id;
-    @DateTimeFormat(pattern = "YYYY-MM-DD HH:mm:ss")
+    @DateTimeFormat(pattern = DATE_TIME)
     private LocalDateTime start;
-    @DateTimeFormat(pattern = "YYYY-MM-DD HH:mm:ss")
+    @DateTimeFormat(pattern = DATE_TIME)
     private LocalDateTime end;
     private BookingStatus status;
     private UserDtoBookingToResponse booker;

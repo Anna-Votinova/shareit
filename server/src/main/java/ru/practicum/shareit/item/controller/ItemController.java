@@ -9,14 +9,14 @@ import ru.practicum.shareit.item.service.ItemService;
 import java.util.List;
 import java.util.Optional;
 
+import static ru.practicum.shareit.Constants.USER_ID;
+
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
-
-    private static final String USER_ID = "X-Sharer-User-Id";
 
     @GetMapping
     public List<ItemDto> getAllItemsOfUser(@RequestHeader(USER_ID) Long userId,

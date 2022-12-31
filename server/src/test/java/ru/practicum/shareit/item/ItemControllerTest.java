@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static ru.practicum.shareit.Constants.USER_ID;
 
 @WebMvcTest(controllers = ItemController.class)
 public class ItemControllerTest {
@@ -40,7 +41,6 @@ public class ItemControllerTest {
 
     private ItemDto dto;
 
-    private static final String ITEM_HEADER = "X-Sharer-User-Id";
 
     @BeforeEach
     public void setUp() {
@@ -65,7 +65,7 @@ public class ItemControllerTest {
 
         mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(dto))
-                        .header(ITEM_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -81,7 +81,7 @@ public class ItemControllerTest {
 
         mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(dto))
-                        .header(ITEM_HEADER, -1L)
+                        .header(USER_ID, -1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(404));
@@ -96,7 +96,7 @@ public class ItemControllerTest {
         when(itemService.getItemByIdForAllUser(anyLong(), anyLong())).thenReturn(Optional.ofNullable(dto));
 
         mvc.perform(get("/items/1")
-                        .header(ITEM_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -110,7 +110,7 @@ public class ItemControllerTest {
         when(itemService.getItemByIdForAllUser(anyLong(), anyLong())).thenThrow(IllegalArgumentException.class);
 
         mvc.perform(get("/items/-1")
-                        .header(ITEM_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(404));
@@ -124,7 +124,7 @@ public class ItemControllerTest {
         when(itemService.findAllPageable(anyLong(), anyInt(), anyInt())).thenReturn(List.of(dto));
 
         mvc.perform(get("/items")
-                        .header(ITEM_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .param("from", "1")
                         .param("size", "1")
@@ -153,7 +153,7 @@ public class ItemControllerTest {
         when(itemService.findAllPageable(anyLong(), anyInt(), anyInt())).thenReturn(List.of(dto));
 
         mvc.perform(get("/items")
-                        .header(ITEM_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .param("from", "1")
                         .param("size", "1")
@@ -187,7 +187,7 @@ public class ItemControllerTest {
                 .thenThrow(ValidationException.class);
 
         mvc.perform(get("/items")
-                        .header(ITEM_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("from", "-1")
                         .param("size", "0")
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -205,7 +205,7 @@ public class ItemControllerTest {
                 .thenThrow(IllegalArgumentException.class);
 
         mvc.perform(get("/items")
-                        .header(ITEM_HEADER, -1L)
+                        .header(USER_ID, -1L)
                         .param("from", "1")
                         .param("size", "1")
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -288,7 +288,7 @@ public class ItemControllerTest {
 
         mvc.perform(patch("/items/1")
                         .content(mapper.writeValueAsString(dto2))
-                        .header(ITEM_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -306,7 +306,7 @@ public class ItemControllerTest {
 
         mvc.perform(patch("/items/100")
                         .content(mapper.writeValueAsString(dto))
-                        .header(ITEM_HEADER, 100L)
+                        .header(USER_ID, 100L)
                         .param("from", "1")
                         .param("size", "1")
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -327,7 +327,7 @@ public class ItemControllerTest {
 
         mvc.perform(post("/items/1/comment")
                         .content(mapper.writeValueAsString(commentDto))
-                        .header(ITEM_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -349,7 +349,7 @@ public class ItemControllerTest {
 
         mvc.perform(post("/items/-100/comment")
                         .content(mapper.writeValueAsString(commentDto))
-                        .header(ITEM_HEADER, 100L)
+                        .header(USER_ID, 100L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(404));
@@ -370,7 +370,7 @@ public class ItemControllerTest {
 
         mvc.perform(post("/items/1/comment")
                         .content(mapper.writeValueAsString(commentDto))
-                        .header(ITEM_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(400));

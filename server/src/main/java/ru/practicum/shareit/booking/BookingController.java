@@ -7,14 +7,14 @@ import ru.practicum.shareit.booking.dto.BookingDtoToResponse;
 
 import java.util.List;
 
+import static ru.practicum.shareit.Constants.USER_ID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
 
     private final BookingService bookingService;
-
-    private static final String USER_ID = "X-Sharer-User-Id";
 
     @PostMapping
     public BookingDtoToResponse createBooking(@RequestHeader(USER_ID) Long userId,

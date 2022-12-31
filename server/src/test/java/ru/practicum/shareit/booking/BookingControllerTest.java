@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.practicum.shareit.Constants.USER_ID;
 
 @WebMvcTest(controllers = BookingController.class)
 public class BookingControllerTest {
@@ -48,8 +49,6 @@ public class BookingControllerTest {
     private ItemDtoBookingToResponse item;
 
 
-
-    private static final String BOOKING_HEADER = "X-Sharer-User-Id";
 
     @BeforeEach
     public void setUp() {
@@ -80,7 +79,7 @@ public class BookingControllerTest {
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(requestDto))
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -96,7 +95,7 @@ public class BookingControllerTest {
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(requestDto))
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(400));
@@ -112,7 +111,7 @@ public class BookingControllerTest {
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(requestDto))
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(404));
@@ -136,7 +135,7 @@ public class BookingControllerTest {
 
         mvc.perform(patch("/bookings/1")
                         .param("approved", "true")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -160,7 +159,7 @@ public class BookingControllerTest {
 
         mvc.perform(patch("/bookings/1")
                         .param("approved", "true")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(404));
@@ -177,7 +176,7 @@ public class BookingControllerTest {
 
         mvc.perform(patch("/bookings/1")
                         .param("approved", "true")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(400));
@@ -191,7 +190,7 @@ public class BookingControllerTest {
         when(bookingService.getBooking(anyLong(), anyLong())).thenReturn(responseDto);
 
         mvc.perform(get("/bookings/1")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -208,7 +207,7 @@ public class BookingControllerTest {
                 .thenThrow(IllegalArgumentException.class);
 
         mvc.perform(get("/bookings/1")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(404));
@@ -224,7 +223,7 @@ public class BookingControllerTest {
                 .thenReturn(List.of(responseDto));
 
         mvc.perform(get("/bookings")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("state", "ALL")
                         .param("from", "1")
                         .param("size", "1")
@@ -244,7 +243,7 @@ public class BookingControllerTest {
                 .thenReturn(Collections.emptyList());
 
         mvc.perform(get("/bookings")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("state", "ALL")
                         .param("from", "1")
                         .param("size", "1")
@@ -264,7 +263,7 @@ public class BookingControllerTest {
                 .thenThrow(ValidationException.class);
 
         mvc.perform(get("/bookings")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("state", "ALL")
                         .param("from", "-1")
                         .param("size", "0")
@@ -283,7 +282,7 @@ public class BookingControllerTest {
                 .thenThrow(IllegalArgumentException.class);
 
         mvc.perform(get("/bookings")
-                        .header(BOOKING_HEADER, -1L)
+                        .header(USER_ID, -1L)
                         .param("state", "ALL")
                         .param("from", "1")
                         .param("size", "1")
@@ -302,13 +301,13 @@ public class BookingControllerTest {
                 .thenThrow(UnknownStateException.class);
 
         mvc.perform(get("/bookings")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("state", BookingState.UNSUPPORTED_STATUS.toString())
                         .param("from", "1")
                         .param("size", "1")
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(status().is(500));
+                .andExpect(status().is(400));
 
     }
 
@@ -321,7 +320,7 @@ public class BookingControllerTest {
                 .thenReturn(List.of(responseDto));
 
         mvc.perform(get("/bookings/owner")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("state", "ALL")
                         .param("from", "1")
                         .param("size", "1")
@@ -341,7 +340,7 @@ public class BookingControllerTest {
                 .thenReturn(Collections.emptyList());
 
         mvc.perform(get("/bookings/owner")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("state", "ALL")
                         .param("from", "1")
                         .param("size", "1")
@@ -361,7 +360,7 @@ public class BookingControllerTest {
                 .thenThrow(ValidationException.class);
 
         mvc.perform(get("/bookings/owner")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("state", "ALL")
                         .param("from", "-1")
                         .param("size", "0")
@@ -380,13 +379,13 @@ public class BookingControllerTest {
                 .thenThrow(UnknownStateException.class);
 
         mvc.perform(get("/bookings/owner")
-                        .header(BOOKING_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("state", BookingState.UNSUPPORTED_STATUS.toString())
                         .param("from", "1")
                         .param("size", "1")
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(status().is(500));
+                .andExpect(status().is(400));
 
     }
 

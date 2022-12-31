@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.practicum.shareit.Constants.USER_ID;
 
 @WebMvcTest(controllers = ItemRequestController.class)
 public class ItemRequestControllerTest {
@@ -38,7 +39,6 @@ public class ItemRequestControllerTest {
 
     private ItemRequestDto dto;
 
-    private static final String ITEM_REQUEST_HEADER = "X-Sharer-User-Id";
 
     @BeforeEach
     public void setUp() {
@@ -59,7 +59,7 @@ public class ItemRequestControllerTest {
 
         mvc.perform(post("/requests")
                         .content(mapper.writeValueAsString(dto))
-                        .header(ITEM_REQUEST_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -76,7 +76,7 @@ public class ItemRequestControllerTest {
 
         mvc.perform(post("/requests")
                         .content(mapper.writeValueAsString(dto))
-                        .header(ITEM_REQUEST_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(404));
@@ -91,7 +91,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.findItemRequestById(anyLong(), anyLong())).thenReturn(dto);
 
         mvc.perform(get("/requests/1")
-                        .header(ITEM_REQUEST_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -106,7 +106,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.findItemRequestById(anyLong(), any())).thenThrow(IllegalArgumentException.class);
 
         mvc.perform(get("/requests/1")
-                        .header(ITEM_REQUEST_HEADER, -1L)
+                        .header(USER_ID, -1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().is(404));
@@ -121,7 +121,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.findAll(anyLong())).thenReturn(List.of(dto));
 
         mvc.perform(get("/requests")
-                        .header(ITEM_REQUEST_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -147,7 +147,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.findAll(anyLong())).thenReturn(List.of(dto));
 
         mvc.perform(get("/requests")
-                        .header(ITEM_REQUEST_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -172,7 +172,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.findAll(anyLong())).thenReturn(Collections.emptyList());
 
         mvc.perform(get("/requests")
-                        .header(ITEM_REQUEST_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isOk())
@@ -187,7 +187,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.findAllPageable(anyLong(), anyInt(), anyInt())).thenReturn(List.of(dto));
 
         mvc.perform(get("/requests/all")
-                        .header(ITEM_REQUEST_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .param("from", "1")
                         .param("size", "1")
@@ -206,7 +206,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.findAllPageable(anyLong(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
 
         mvc.perform(get("/requests/all")
-                        .header(ITEM_REQUEST_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                         .param("from", "1")
                         .param("size", "1")
@@ -225,7 +225,7 @@ public class ItemRequestControllerTest {
                 .thenThrow(ValidationException.class);
 
         mvc.perform(get("/requests/all")
-                        .header(ITEM_REQUEST_HEADER, 1L)
+                        .header(USER_ID, 1L)
                         .param("from", "-1")
                         .param("size", "0")
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -243,7 +243,7 @@ public class ItemRequestControllerTest {
                 .thenThrow(IllegalArgumentException.class);
 
         mvc.perform(get("/requests/all")
-                        .header(ITEM_REQUEST_HEADER, -1L)
+                        .header(USER_ID, -1L)
                         .param("from", "1")
                         .param("size", "1")
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)

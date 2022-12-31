@@ -538,7 +538,7 @@ public class ItemServiceTest {
         verify(itemRepository, times(0))
                 .findById(any());
         verify(bookingRepository, times(0))
-                .findAllByItemIdAndBookerIdAndEndBefore(any(), any(), any());
+                .findAllByItemIdAndBookerIdAndEndBeforeAndStatus(any(), any(), any(), any());
         verify(commentRepository, times(0))
                 .save(any());
 
@@ -565,7 +565,7 @@ public class ItemServiceTest {
         verify(itemRepository, times(1))
                 .findById(any());
         verify(bookingRepository, times(0))
-                .findAllByItemIdAndBookerIdAndEndBefore(any(), any(), any());
+                .findAllByItemIdAndBookerIdAndEndBeforeAndStatus(any(), any(), any(), any());
         verify(commentRepository, times(0))
                 .save(any());
 

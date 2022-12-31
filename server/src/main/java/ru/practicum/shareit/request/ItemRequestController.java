@@ -6,6 +6,8 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import java.util.List;
 
+import static ru.practicum.shareit.Constants.USER_ID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/requests")
@@ -13,7 +15,6 @@ public class ItemRequestController {
 
     private final ItemRequestService itemRequestService;
 
-    private static final String USER_ID = "X-Sharer-User-Id";
 
     @PostMapping
     public ItemRequestDto addNewRequest(@RequestHeader(USER_ID) Long userId,
